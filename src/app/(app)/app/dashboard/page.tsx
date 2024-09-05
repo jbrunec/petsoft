@@ -1,13 +1,11 @@
 import Branding from "@/components/branding";
 import ContentBlock from "@/components/content-block";
-import H1 from "@/components/h1";
 import PetDetails from "@/components/pet-details";
 import PetList from "@/components/pet-list";
 import SearchForm from "@/components/search-form";
 import Stats from "@/components/stats";
-import React from "react";
 
-export default function Dashboard() {
+export default async function Dashboard() {
   return (
     <main>
       <div className="flex items-center justify-between text-white py-8">

@@ -25,6 +25,7 @@ export default function PetDetails() {
 }
 
 function TopBar({ pet }: Props) {
+  const { handleCheckoutPet } = usePetContext();
   return (
     <div className="flex items-center bg-white px-8 py-5 border-b border-light">
       <Image
@@ -37,7 +38,12 @@ function TopBar({ pet }: Props) {
       <h2 className="text-3xl font-semibold leading-7 ml-5">{pet?.name}</h2>
       <div className="ml-auto space-x-2">
         <PetButton actionType={"edit"}>Edit</PetButton>
-        <PetButton actionType={"checkout"}>Checkout</PetButton>
+        <PetButton
+          actionType={"checkout"}
+          onClick={() => handleCheckoutPet(pet.id)}
+        >
+          Checkout
+        </PetButton>
       </div>
     </div>
   );

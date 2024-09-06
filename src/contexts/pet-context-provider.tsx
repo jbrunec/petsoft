@@ -12,6 +12,7 @@ type TPetContext = {
   selectedPet: Pet | undefined;
   numberOfPets: number;
   handleChangeSelectedPetId: (id: string) => void;
+  handleCheckoutPet: (id: string) => void;
 };
 export const PetContext = createContext<TPetContext | null>(null);
 export default function PetContextProvider({
@@ -28,6 +29,11 @@ export default function PetContextProvider({
     setSelectedPetId(id);
   };
 
+  const handleCheckoutPet = (id: string) => {
+    setPets((prev) => prev.filter((pet) => pet.id !== id));
+    setSelectedPetId(null);
+  };
+
   return (
     <PetContext.Provider
       value={{
@@ -36,6 +42,7 @@ export default function PetContextProvider({
         selectedPet,
         numberOfPets,
         handleChangeSelectedPetId,
+        handleCheckoutPet,
       }}
     >
       {children}

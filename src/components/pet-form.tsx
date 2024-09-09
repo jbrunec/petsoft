@@ -1,11 +1,11 @@
 "use client";
-import { FormEvent } from "react";
-import { Button } from "./ui/button";
+import { addPet, editPet } from "@/actions/actions";
+import { usePetContext } from "@/lib/hooks";
+import PetFormBtn from "./pet-form-btn";
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
 import { Textarea } from "./ui/textarea";
-import { usePetContext } from "@/lib/hooks";
-import { Pet } from "@/lib/types";
+import { toast } from "sonner";
 
 type PetFormProps = {
   actionType: "add" | "edit";
@@ -15,28 +15,27 @@ export default function PetForm({
   actionType,
   onFormSubmission,
 }: PetFormProps) {
-  const { handleAddPet, handleEditPet, selectedPet } = usePetContext();
-  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    const formData = new FormData(event.currentTarget);
-    const pet = {
-      name: formData.get("name") as string,
-      ownerName: formData.get("ownerName") as string,
-      imageUrl:
-        (formData.get("imageUrl") as string) ||
-        "https://bytegrad.com/course-assets/react-nextjs/pet-placeholder.png",
-      age: +(formData.get("age") as string),
-      notes: formData.get("notes") as string,
-    };
-    if (actionType === "add") {
-      handleAddPet(pet);
-    } else if (actionType === "edit") {
-      handleEditPet(selectedPet!.id, pet);
-    }
-    onFormSubmission();
-  };
+  const { selectedPet } = usePetContext();
+
   return (
-    <form onSubmit={handleSubmit} className="flex">
+    <form
+      action={async (formData) => {
+        if (actionType === "add") {
+          const res = await addPet(formData);
+          if (res) {
+            toast.warning(res.message);
+          }
+        } else if (actionType === "edit") {
+          const res = await editPet(selectedPet!.id, formData);
+          if (res) {
+            toast.warning(res.message);
+          }
+        }
+
+        onFormSubmission();
+      }}
+      className="flex flex-col"
+    >
       <div className="space-y-3">
         <div className="space-y-1">
           <Label htmlFor="name">Name</Label>
@@ -88,9 +87,7 @@ export default function PetForm({
           />
         </div>
       </div>
-      <Button type="submit" className="mt-5 self-end">
-        {actionType === "add" ? "Add a new pet" : "Edit pet"}
-      </Button>
+      <PetFormBtn actionType={actionType} />
     </form>
   );
 }

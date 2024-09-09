@@ -1,4 +1,5 @@
 "use client";
+import { addPet } from "@/actions/actions";
 import { Pet } from "@/lib/types";
 import React, { createContext, ReactNode, useState } from "react";
 
@@ -18,10 +19,9 @@ type TPetContext = {
 };
 export const PetContext = createContext<TPetContext | null>(null);
 export default function PetContextProvider({
-  data,
+  data: pets,
   children,
 }: PetContextProviderProps) {
-  const [pets, setPets] = useState(data);
   const [selectedPetId, setSelectedPetId] = useState<string | null>(null);
 
   const selectedPet = pets.find((pet) => pet.id == selectedPetId);
@@ -32,32 +32,33 @@ export default function PetContextProvider({
   };
 
   const handleCheckoutPet = (id: string) => {
-    setPets((prev) => prev.filter((pet) => pet.id !== id));
-    setSelectedPetId(null);
+    // setPets((prev) => prev.filter((pet) => pet.id !== id));
+    // setSelectedPetId(null);
   };
 
-  const handleAddPet = (newPet: Omit<Pet, "id">) => {
-    setPets((prev) => [
-      ...prev,
-      {
-        id: Date.now().toString(),
-        ...newPet,
-      },
-    ]);
+  const handleAddPet = async (newPet: Omit<Pet, "id">) => {
+    // setPets((prev) => [
+    //   ...prev,
+    //   {
+    //     id: Date.now().toString(),
+    //     ...newPet,
+    //   },
+    // ]);
+    // await addPet(newPet);
   };
 
   const handleEditPet = (petId: string, updatedPet: Omit<Pet, "id">) => {
-    setPets((prev) =>
-      prev.map((pet) => {
-        if (pet.id === petId) {
-          return {
-            id: petId,
-            ...updatedPet,
-          };
-        }
-        return pet;
-      })
-    );
+    // setPets((prev) =>
+    //   prev.map((pet) => {
+    //     if (pet.id === petId) {
+    //       return {
+    //         id: petId,
+    //         ...updatedPet,
+    //       };
+    //     }
+    //     return pet;
+    //   })
+    // );
   };
 
   return (

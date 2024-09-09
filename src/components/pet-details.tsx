@@ -46,9 +46,7 @@ function TopBar({ pet }: Props) {
           actionType={"checkout"}
           disabled={isPending}
           onClick={async () => {
-            startTransition(async () => {
-              await deletePet(pet.id);
-            });
+            await handleCheckoutPet(pet.id);
           }}
         >
           Checkout

@@ -4,25 +4,17 @@ import BackgroundPattern from "@/components/background-pattern";
 import { Toaster } from "@/components/ui/sonner";
 import PetContextProvider from "@/contexts/pet-context-provider";
 import SearchContextProvider from "@/contexts/search-context-provider";
-import prisma from "@/lib/db";
+import { checkAuth, getPetsByUserId } from "@/lib/server-utils";
 import { ReactNode } from "react";
-import { auth } from "@/lib/auth";
-import { redirect } from "next/navigation";
+
 export default async function DashboardLayout({
   children,
 }: {
   children: ReactNode;
 }) {
-  const session = await auth();
-  if (!session?.user) {
-    redirect("/login");
-  }
-  console.log(session);
-  const pets = await prisma.pet.findMany({
-    where: {
-      userId: session.user.id,
-    },
-  });
+  const session = await checkAuth();
+  const pets = await getPetsByUserId(session.user.id);
+
   return (
     <>
       <BackgroundPattern />

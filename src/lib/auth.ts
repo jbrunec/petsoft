@@ -43,6 +43,7 @@ const config = {
       // runs on every request with middleware
       const isTryingToAccessApp = request.nextUrl.pathname.includes("/app");
       const isLoggedIn = Boolean(auth?.user);
+
       if (!isLoggedIn && isTryingToAccessApp) {
         return false;
       }
@@ -52,7 +53,13 @@ const config = {
       }
 
       if (isLoggedIn && !isTryingToAccessApp) {
-        return Response.redirect(new URL("/app/dashboard", request.nextUrl));
+        if (
+          request.nextUrl.pathname.includes("/login") ||
+          request.nextUrl.pathname.includes("/signup")
+        ) {
+          return Response.redirect(new URL("/payment", request.nextUrl));
+        }
+        return true;
       }
 
       if (!isLoggedIn && !isTryingToAccessApp) {

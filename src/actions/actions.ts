@@ -1,14 +1,16 @@
 "use server";
-import { signIn, signOut, auth } from "@/lib/auth";
+import { signIn, signOut } from "@/lib/auth";
 import prisma from "@/lib/db";
+import { checkAuth, getPetById } from "@/lib/server-utils";
 import { sleep } from "@/lib/utils";
 import { authSchema, petFormSchema, petIdSchema } from "@/lib/validations";
-import { revalidatePath } from "next/cache";
-import bcrypt from "bcryptjs";
-import { redirect } from "next/navigation";
-import { checkAuth, getPetById } from "@/lib/server-utils";
 import { Prisma } from "@prisma/client";
+import bcrypt from "bcryptjs";
 import { AuthError } from "next-auth";
+import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
+
+const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
 
 export async function logIn(prevState: unknown, formData: unknown) {
   sleep(1000);
@@ -37,6 +39,7 @@ export async function logIn(prevState: unknown, formData: unknown) {
 }
 
 export async function logOut() {
+  sleep(1000);
   await signOut({ redirectTo: "/" });
 }
 
@@ -47,7 +50,7 @@ export async function signUp(prevState: unknown, formData: unknown) {
       message: "Invalid form data.",
     };
   }
-  const formDataObject = Object.fromEntries(formData.entries());
+  const formDataObject = Object.fromEntries(formData);
   const validatedFormData = authSchema.safeParse(formDataObject);
   if (!validatedFormData.success) {
     return {
@@ -183,4 +186,21 @@ export async function deletePet(petId: unknown) {
     };
   }
   revalidatePath("/app", "layout");
+}
+
+export async function createCheckoutSession() {
+  const session = await checkAuth();
+  const checkoutSession = await stripe.checkout.sessions.create({
+    customer_email: session.user.email,
+    line_items: [
+      {
+        price: "price_1PxpQmGdS9OGnI2ymLRLFRcG",
+        quantity: 1,
+      },
+    ],
+    mode: "payment",
+    success_url: `${process.env.BASE_URL}/payment?success=true`,
+    cancel_url: `${process.env.BASE_URL}/payment?cancelled=true`,
+  });
+  redirect(checkoutSession.url);
 }

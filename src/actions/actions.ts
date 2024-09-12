@@ -13,7 +13,6 @@ import { redirect } from "next/navigation";
 const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
 
 export async function logIn(prevState: unknown, formData: unknown) {
-  sleep(1000);
   if (!(formData instanceof FormData)) {
     return {
       message: "Invalid form data.",
@@ -39,12 +38,10 @@ export async function logIn(prevState: unknown, formData: unknown) {
 }
 
 export async function logOut() {
-  sleep(1000);
   await signOut({ redirectTo: "/" });
 }
 
 export async function signUp(prevState: unknown, formData: unknown) {
-  sleep(1000);
   if (!(formData instanceof FormData)) {
     return {
       message: "Invalid form data.",
@@ -71,6 +68,16 @@ export async function signUp(prevState: unknown, formData: unknown) {
       if (error.code === "P2002") {
         return {
           message: "Email already exists.",
+        };
+      }
+      if (error.code === "P2003") {
+        return {
+          message: "Invalid email.",
+        };
+      }
+      if (error.code === "P2004") {
+        return {
+          message: "Invalid password.",
         };
       }
     }

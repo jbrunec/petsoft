@@ -12,12 +12,13 @@ type PageProps = {
 export default function Page({ searchParams }: PageProps) {
   const [isPending, startTransition] = useTransition();
   const router = useRouter();
-  const { update } = useSession();
+  const { data: session, update, status } = useSession();
   return (
     <main className="flex flex-col items-center space-y-10">
       <H1>PetSoft access requires payment.</H1>
       {searchParams.success && (
         <Button
+          disabled={status === "loading" || session?.user.hasAccess}
           onClick={async () => {
             await update(true); // for some reason we need to pass true with this version
             router.push("/app/dashboard");

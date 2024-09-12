@@ -3,6 +3,7 @@ import NextAuth, { NextAuthConfig } from "next-auth";
 import credentials from "next-auth/providers/credentials";
 import { getUserByEmail } from "./server-utils";
 import { authSchema } from "./validations";
+import { sleep } from "./utils";
 
 const config = {
   pages: {
@@ -55,11 +56,19 @@ const config = {
         return Response.redirect(new URL("/payment", request.nextUrl));
       }
 
-      if (isLoggedIn && !isTryingToAccessApp) {
+      if (
+        isLoggedIn &&
+        (request.nextUrl.pathname.includes("/login") ||
+          request.nextUrl.pathname.includes("/signup")) &&
+        auth?.user.hasAccess
+      ) {
+        return Response.redirect(new URL("/app/dashboard", request.nextUrl));
+      }
+
+      if (isLoggedIn && !isTryingToAccessApp && !auth?.user.hasAccess) {
         if (
-          (request.nextUrl.pathname.includes("/login") ||
-            request.nextUrl.pathname.includes("/signup")) &&
-          !auth?.user.hasAccess
+          request.nextUrl.pathname.includes("/login") ||
+          request.nextUrl.pathname.includes("/signup")
         ) {
           return Response.redirect(new URL("/payment", request.nextUrl));
         }
@@ -69,7 +78,7 @@ const config = {
       if (!isLoggedIn && !isTryingToAccessApp) {
         return true;
       }
-
+      console.log("here");
       return false;
     },
     jwt: async ({ token, user, trigger }) => {
@@ -81,6 +90,7 @@ const config = {
       }
 
       if (trigger === "update") {
+        await sleep(1000);
         const userFromDB = await getUserByEmail(token.email);
         if (userFromDB) {
           token.hasAccess = userFromDB.hasAccess;

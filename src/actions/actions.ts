@@ -50,7 +50,7 @@ export async function signUp(prevState: unknown, formData: unknown) {
       message: "Invalid form data.",
     };
   }
-  const formDataObject = Object.fromEntries(formData);
+  const formDataObject = Object.fromEntries(formData.entries());
   const validatedFormData = authSchema.safeParse(formDataObject);
   if (!validatedFormData.success) {
     return {
@@ -83,8 +83,6 @@ export async function signUp(prevState: unknown, formData: unknown) {
 }
 
 export async function addPet(pet: unknown) {
-  await sleep(1000);
-
   const session = await checkAuth();
 
   const validatedPet = petFormSchema.safeParse(pet);
@@ -116,7 +114,6 @@ export async function addPet(pet: unknown) {
 }
 
 export async function editPet(petId: unknown, newPetData: unknown) {
-  await sleep(1000);
   const session = await checkAuth();
   const validatedPetId = petIdSchema.safeParse(petId);
   const validatedPet = petFormSchema.safeParse(newPetData);
@@ -150,8 +147,6 @@ export async function editPet(petId: unknown, newPetData: unknown) {
 }
 
 export async function deletePet(petId: unknown) {
-  await sleep(1000);
-
   const session = await checkAuth();
 
   const validatedPetId = petIdSchema.safeParse(petId);

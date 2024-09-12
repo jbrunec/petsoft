@@ -48,14 +48,18 @@ const config = {
         return false;
       }
 
-      if (isLoggedIn && isTryingToAccessApp) {
+      if (isLoggedIn && isTryingToAccessApp && auth?.user.hasAccess) {
         return true;
+      }
+      if (isLoggedIn && isTryingToAccessApp && !auth?.user.hasAccess) {
+        return Response.redirect(new URL("/payment", request.nextUrl));
       }
 
       if (isLoggedIn && !isTryingToAccessApp) {
         if (
-          request.nextUrl.pathname.includes("/login") ||
-          request.nextUrl.pathname.includes("/signup")
+          (request.nextUrl.pathname.includes("/login") ||
+            request.nextUrl.pathname.includes("/signup")) &&
+          !auth?.user.hasAccess
         ) {
           return Response.redirect(new URL("/payment", request.nextUrl));
         }
@@ -68,17 +72,25 @@ const config = {
 
       return false;
     },
-    jwt: ({ token, user }) => {
+    jwt: async ({ token, user, trigger }) => {
       // we want to extend the token to include userId (not passed automatically)
       if (user) {
         token.userId = user.id;
+        token.email = user.email!;
+        token.hasAccess = user.hasAccess;
+      }
+
+      if (trigger === "update") {
+        const userFromDB = await getUserByEmail(token.email);
+        if (userFromDB) {
+          token.hasAccess = userFromDB.hasAccess;
+        }
       }
       return token;
     },
     session: ({ session, token }) => {
-      if (session.user) {
-        session.user.id = token.userId;
-      }
+      session.user.id = token.userId;
+      session.user.hasAccess = token.hasAccess;
       return session;
     },
   },
